@@ -95,6 +95,9 @@ class JsonOutput
             $deppkgs = trim(str_replace($this->excludedServices, '', $pkg->install_dep_services));
         } else {
             $deppkgs = null;
+	}
+	if ($deppkgs == "") {
+            $deppkgs = null;
         }
 
         $packageJSON = array(

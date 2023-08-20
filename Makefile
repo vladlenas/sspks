@@ -10,7 +10,7 @@ spk: sspks_noarch_${DATE}.spk
 
 .PHONY: build
 build:
-	@docker build --build-arg BRANCH=${BRANCH} --build-arg COMMIT=${COMMIT} --tag=jdel/sspks .
+	@docker build --build-arg BRANCH=${BRANCH} --build-arg COMMIT=${COMMIT} --tag=vladlenas/sspks .
 
 sspks_noarch_${DATE}.spk: package.tgz INFO
 	@cd ./_syno_package && COPYFILE_DISABLE=1 tar cfv ../sspks_noarch_${DATE}.spk --exclude='./package' *
@@ -45,4 +45,4 @@ clean:
 
 .PHONY: release
 release: build
-	@docker build --tag=jdel/sspks:$(shell cat VERSION) .
+	@docker build --tag=vladlenas/sspks:$(shell cat VERSION) .

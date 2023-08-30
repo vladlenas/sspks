@@ -61,6 +61,8 @@ armv8:
         - DS418
         - DS420j
         - RS819
+    rtd1296b: 
+        - DS214
         
 comcerto2k:
     comcerto2k:
@@ -181,6 +183,7 @@ x86_64:
         - DS720+
         - DS920+
         - DS1520+
+        - DS224+
     dockerx64:
         - DockerDSM
     grantley:

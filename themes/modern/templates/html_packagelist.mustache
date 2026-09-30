@@ -21,16 +21,16 @@
                     <h2>{{ displayname }}</h2>
                     {{#beta}}<span class="beta-badge">BETA</span>{{/beta}}
                 </div>
-                <div class="package-version">v{{ version }}</div>
+                <span class="package-version">v{{ version }}</span>
             </div>
         </div>
 
         <p class="package-description">{{ description }}</p>
 
         <div class="package-meta">
-            <span><b>DSM</b> {{ firmware }}</span>
-            <span><b>Arch</b> {{# arch }}{{ . }}{{^ @last }}, {{/ @last }}{{/ arch }}</span>
-            <span><b>Maintainer</b> {{ maintainer }}</span>
+            <span><b>DSM</b>{{ firmware }}</span>
+            <span><b>Architecture</b>{{# arch }}{{ . }}{{^ @last }}, {{/ @last }}{{/ arch }}</span>
+            <span><b>Maintainer</b>{{ maintainer }}</span>
         </div>
 
         <div class="package-details spk-details spk-details-hidden">

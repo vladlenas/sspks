@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Community packages for Synology">
+    <title>{{ siteName }}</title>
+    <link rel="stylesheet" href="{{ themeUrl }}css/style.css?v=4">
+    <script src="{{ themeUrl }}js/script.js?v=4" defer></script>
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-inner">
+        <a class="brand" href="{{ baseUrlRelative }}">
+            <span>
+                <strong>Synology Package Repository</strong>
+                <small>Community packages for Synology</small>
+            </span>
+        </a>
+        <nav class="top-nav">
+            {{# is_devicelist }}<span class="nav-current">NAS Models</span>{{/ is_devicelist }}
+            {{^ is_devicelist }}<a href="{{ baseUrlRelative }}">NAS Models</a>{{/ is_devicelist }}
+            {{# fullList }}<span class="nav-current">All Packages</span>{{/ fullList }}
+            {{^ fullList }}<a href="{{ baseUrlRelative }}?fulllist=true">All Packages</a>{{/ fullList }}
+        </nav>
+    </div>
+</header>
+
+<main class="container main-content">
+{{^ arch }}
+<section class="repo-banner">
+    <div>
+        <span class="banner-label">PACKAGE CENTER</span>
+        <strong>Add this repository to Synology Package Center</strong>
+        <code>{{ baseUrl }}</code>
+    </div>
+</section>
+{{/ arch }}

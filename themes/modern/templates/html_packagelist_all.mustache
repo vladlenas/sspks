@@ -1,0 +1,16 @@
+{{> html_head }}
+<section class="page-heading">
+    <span class="eyebrow">REPOSITORY</span>
+    <h1>All package files</h1>
+    <p>Complete list of SPK files currently published in this repository.</p>
+</section>
+<div class="file-list">
+{{# packagelist }}
+    <a class="file-row" href="{{ url }}">
+        <span class="file-icon">SPK</span>
+        <span class="file-name">{{ filename }}</span>
+        <span class="file-arrow">↓</span>
+    </a>
+{{/ packagelist }}
+</div>
+{{> html_tail }}

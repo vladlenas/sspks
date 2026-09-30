@@ -1,0 +1,19 @@
+{{> html_head }}
+<section class="page-heading">
+    <span class="eyebrow">SUPPORTED DEVICES</span>
+    <h1>Synology NAS models</h1>
+    <p>Select your NAS model to see compatible packages.</p>
+</section>
+
+
+
+<div class="model-grid" id="model-grid">
+{{# modellist }}
+    <a class="model-card" href="?arch={{ arch }}" data-model-family="{{ family }}">
+        <span class="model-name">{{ name }}</span>
+        <span class="model-arch">{{ arch }}</span>
+        <span class="model-arrow">→</span>
+    </a>
+{{/ modellist }}
+</div>
+{{> html_tail }}

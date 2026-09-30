@@ -1,0 +1,61 @@
+{{> html_head }}
+<section class="page-heading package-heading">
+    <div>
+        <a class="back-link" href="{{ baseUrlRelative }}">← All NAS models</a>
+        <span class="eyebrow">PACKAGE REPOSITORY</span>
+        <h1>Packages for {{ arch }}</h1>
+        <p>Compatible packages for this architecture.</p>
+    </div>
+    <div class="beta-control">
+        <label><input type="checkbox" id="switch-beta" onclick="toggleBeta();"> Show beta packages</label>
+    </div>
+</section>
+
+<div class="package-grid">
+{{# packagelist }}
+    <article class="package-card{{#beta}} spk-beta{{/beta}}">
+        <div class="package-top">
+            <img class="package-icon" src="{{ thumbnail_url.0 }}" alt="{{ displayname }}">
+            <div class="package-title-wrap">
+                <div class="package-title-line">
+                    <h2>{{ displayname }}</h2>
+                    {{#beta}}<span class="beta-badge">BETA</span>{{/beta}}
+                </div>
+                <div class="package-version">v{{ version }}</div>
+            </div>
+        </div>
+
+        <p class="package-description">{{ description }}</p>
+
+        <div class="package-meta">
+            <span><b>DSM</b> {{ firmware }}</span>
+            <span><b>Arch</b> {{# arch }}{{ . }}{{^ @last }}, {{/ @last }}{{/ arch }}</span>
+            <span><b>Maintainer</b> {{ maintainer }}</span>
+        </div>
+
+        <div class="package-details spk-details spk-details-hidden">
+            <div><span>Package ID</span><strong>{{ package }}</strong></div>
+            <div><span>Version</span><strong>{{ version }}</strong></div>
+            <div><span>Display Name</span><strong>{{ displayname }}</strong></div>
+            <div><span>Firmware</span><strong>{{ firmware }}</strong></div>
+            <div><span>Architecture</span><strong>{{# arch }}{{ . }} {{/ arch }}</strong></div>
+            <div><span>Maintainer</span><strong>{{ maintainer }}</strong></div>
+        </div>
+
+        <div class="package-actions">
+            <button class="button button-secondary" type="button" onclick="toggleDetails(this);">More info</button>
+            <a class="button button-primary" href="{{ spk_url }}" target="_self">Download SPK</a>
+        </div>
+    </article>
+{{/ packagelist }}
+</div>
+
+<script>
+(function () {
+    var toggle = document.getElementById('switch-beta');
+    if (!toggle) return;
+    toggle.checked = false;
+    toggleBeta();
+})();
+</script>
+{{> html_tail }}

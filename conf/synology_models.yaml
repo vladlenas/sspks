@@ -1,0 +1,186 @@
+armada37xx:
+    armada37xx:
+        - DS119j
+        - DS120j
+
+armada38x:
+    armada38x:
+        - DS116
+        - DS216
+        - DS216j
+        - DS218j
+        - DS416j
+        - DS416slim
+        - DS419slim
+        - RS217
+        - RS816
+
+armv7:
+    alpine:
+        - DS1517
+        - DS1817
+    alpine4k:
+        - DS416
+
+armv8:
+    rtd1296:
+        - DS118
+        - DS218
+        - DS218play
+        - DS220j
+        - DS418
+        - DS418j
+        - DS420j
+        - RS819
+    rtd1296b:
+        - DS124
+
+monaco:
+    monaco:
+        - DS216play
+
+x86_64:
+    apollolake:
+        - DS1019+
+        - DS218+
+        - DS418play
+        - DS620slim
+        - DS718+
+        - DS918+
+
+    avoton:
+        - DS1517+
+        - DS1817+
+        - RS1219+
+        - RS818+
+        - RS818RP+
+        - RS2416+
+        - RS2416RP+
+
+    braswell:
+        - DS216+
+        - DS216+II
+        - DS416play
+        - DS716+
+        - DS716+II
+        - DS916+
+
+    broadwell:
+        - DS3617xs
+        - FS2017
+        - FS3400
+        - RS1619xs+
+        - RS18017xs+
+        - RS3617RPxs
+        - RS3617xs+
+        - RS3618xs
+        - RS4017xs+
+
+    broadwellnk:
+        - DS1621xs+
+        - DS3018xs
+        - FS1018
+        - FS3600
+        - RS3621RPxs
+        - RS3621xs+
+        - RS4021xs+
+        - SA3400
+        - SA3600
+
+    broadwellnkv2:
+        - FS3410
+        - SA3410
+        - SA3610
+
+    broadwellntbap:
+        - SA3200D
+
+    denverton:
+        - DS1618+
+        - DS1819+
+        - DS2419+
+        - DVA3219
+        - RS2418+
+        - RS2418RP+
+        - RS2818RP+
+        - RS820+
+        - RS820RP+
+
+    epyc7002:
+        - SA6400
+
+    epyc7003:
+        - FS6420
+        - RS11626xs+
+
+    geminilake:
+        - DS220+
+        - DS420+
+        - DS720+
+        - DS920+
+        - DS1520+
+        - DS224+
+        - DS423+
+
+    geminilakenk:
+        - DS425+
+        - DS225+
+        - FS200T
+
+    grantley:
+        - FS3017
+
+    icelaked:
+        - FS3420
+        - RS1626xs+
+        - RS3626xs
+        - RS4826xs+
+        - RS6426xs+
+
+    kvmx64:
+        - VirtualDSM
+
+    purley:
+        - FS6400
+        - HD6500
+
+    r1000:
+        - DS723+
+        - DS923+
+        - DS1522+
+        - RS422+
+
+    r1000nk:
+        - DS725+
+        - DS725neo+
+
+    v1000:
+        - FS2500
+        - DS1621+
+        - DS1821+
+        - DS1823xs+
+        - RS1221+
+        - RS1221RP+
+        - RS2421+
+        - RS2421RP+
+        - RS2423+
+        - RS2423RP+
+        - RS2821RP+
+        - RS822+
+        - RS822RP+
+        - RS826+
+        - RS826RP+
+
+    v1000nk:
+        - RS1226+
+        - RS1226RP+
+        - RS2825RP+
+        - DS1825+
+        - DS1525+
+        - DS925+
+        - DS1825neo+
+        - DS1525neo+
+        - DS925neo+
+
+    dockerx64:
+        - DockerDSM

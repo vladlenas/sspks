@@ -1,0 +1,35 @@
+site:
+    name: Synology Package Repository
+    theme: modern
+    # If set, packet listing will be disabled
+    # and will redirect to the given URL
+    redirectindex:
+
+packages:
+    file_mask: "*.spk"
+    maintainer: ""
+    maintainer_url: ""
+    distributor: ""
+    distributor_url: ""
+    support_url: ""
+
+# ALL PATHS MUST BE RELATIVE TO THE ROOT
+# DIRECTORY (where the index.php is located)
+# INCLUDE TRAILING SLASH FOR DIRECTORIES!
+paths:
+    cache: cache/
+    models: conf/synology_models.yaml
+    packages: packages/
+    themes: themes/
+
+excludedSynoServices:
+    - apache-sys
+    - apache-web
+    - mysql
+    - mdns
+    - samba
+    - db
+    - applenetwork
+    - cron
+    - nfs
+    - firewall

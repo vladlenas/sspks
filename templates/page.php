@@ -4,38 +4,11 @@
  * @var callable(string): string $e
  */
 $t = $view['t'];
-$asset = static fn (string $name): string => $view['assetBase'] . $name . '?v=' . $view['assetVersion'];
-$bays = $view['betaFlags'];
-$shownBays = array_slice($bays, 0, 16);
+$script = 'app.js';
+require $__templates . '/head.php';
 ?>
-<!doctype html>
-<html lang="<?= $e($view['lang']) ?>">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark">
-    <title><?= $e($view['siteName']) ?></title>
-    <link rel="icon" href="<?= $e($asset('favicon.svg')) ?>" type="image/svg+xml">
-    <link rel="stylesheet" href="<?= $e($asset('app.css')) ?>">
-    <script src="<?= $e($asset('app.js')) ?>" defer></script>
-</head>
 <body>
-<header class="faceplate">
-    <div class="faceplate__inner">
-        <div class="faceplate__label">
-            <h1><?= $e($view['siteName']) ?></h1>
-            <p class="faceplate__count" id="count"><?= $e(\SSpkS\WebPage::plural($view['lang'], $view['count'], $t)) ?></p>
-        </div>
-        <div class="bays" id="bays" aria-hidden="true">
-            <?php foreach ($shownBays as $beta): ?>
-                <span class="bay<?= $beta ? ' bay--beta' : '' ?>"><span class="bay__led"></span></span>
-            <?php endforeach; ?>
-            <?php if (count($bays) > count($shownBays)): ?>
-                <span class="bays__more">+<?= count($bays) - count($shownBays) ?></span>
-            <?php endif; ?>
-        </div>
-    </div>
-</header>
+<?php require $__templates . '/header.php'; ?>
 
 <main class="page">
     <section class="source" aria-labelledby="source-label">
@@ -76,11 +49,4 @@ $shownBays = array_slice($bays, 0, 16);
     <noscript><p class="empty"><?= $e($t['noscript']) ?></p></noscript>
 </main>
 
-<footer class="footer">
-    <span>SSpkS <?= $e($view['version']) ?></span>
-    <?php if ($view['commit'] !== ''): ?><span><?= $e($view['commit']) ?></span><?php endif; ?>
-</footer>
-
-<script type="application/json" id="data"><?= $view['json'] ?></script>
-</body>
-</html>
+<?php require $__templates . '/footer.php'; ?>

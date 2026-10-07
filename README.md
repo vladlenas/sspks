@@ -6,8 +6,9 @@ folder, run the container, and add its address in
 page that lists the packages with search, platform and DSM filters, and
 download links.
 
-Originally based on jdel/sspks by Julien Del-Piccolo; rewritten in 2.0.
-(see [CHANGELOG](CHANGELOG.md)). No runtime dependencies besides PHP 8.2+.
+Originally based on [jdel/sspks](https://github.com/jdel/sspks) by Julien
+Del-Piccolo; rewritten in 2.0 (see [CHANGELOG](CHANGELOG.md)). No runtime
+dependencies besides PHP 8.2+.
 
 ## Run on a Synology NAS
 
@@ -58,6 +59,10 @@ links are still wrong, set `SSPKS_BASE_URL`.
 | `SSPKS_PACKAGES_DISTRIBUTOR` | 〃 | |
 | `SSPKS_PACKAGES_DISTRIBUTOR_URL` | 〃 | |
 | `SSPKS_PACKAGES_SUPPORT_URL` | 〃 | |
+| `SSPKS_STATS` | `off` hides the statistics page and download counts | `on` |
+| `SSPKS_GITHUB_REPOS` | `owner/repo` list (spaces or commas) whose release downloads are shown | |
+| `SSPKS_GITHUB_TOKEN` | GitHub token, only needed above 60 API requests/hour | |
+| `TZ` | Time zone for dates in the statistics, e.g. `Europe/Vilnius` | `UTC` |
 | `SSPKS_PACKAGES_DIR` / `SSPKS_CACHE_DIR` | Folders (only needed outside Docker) | `/packages`, `/cache` |
 
 Without Docker, the same variables can go into `config.local.php` in the
@@ -76,6 +81,21 @@ not offered.
 Optional extras inside an `.spk`: `screen_1.png`, `screen_2.png`, … are shown
 as screenshots. A `gpgkey.asc` in the packages folder is published as keyring
 (DSM 6).
+
+## Download statistics
+
+`/?stats` shows how often packages were downloaded from this server (per day
+and per package, split into downloads from the web page and from Package
+Center or direct links) and, for repositories listed in
+`SSPKS_GITHUB_REPOS`, the download counters of their GitHub releases. The
+package list shows a total per package, and Package Center receives the same
+numbers in `download_count`.
+
+Apache writes one line per package download to `/cache/stats/downloads.log`:
+time, status, path, Range and Referer. No IP addresses or user agents are
+stored. Counting starts with the first download after the update; the cache
+folder must be writable for it. GitHub numbers are refreshed at most once an
+hour.
 
 ## Keeping packages up to date
 

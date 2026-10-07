@@ -13,6 +13,7 @@ final class CatalogJson
      * @param list<Package> $packages
      * @param string $language Synology language code sent by DSM (enu, rus, ger, ...).
      * @param string|null $keyring ASCII-armored GPG public key to publish, if any.
+     * @param array<string, array{total: int, recent: int}> $downloads Download counts per package name.
      */
     public static function render(
         array $packages,
@@ -21,12 +22,16 @@ final class CatalogJson
         string $language,
         bool $dsm7,
         ?string $keyring = null,
+        array $downloads = [],
     ): string {
         $language = preg_match('/^[a-z]{3}$/', $language) === 1 ? $language : 'enu';
 
         $document = ['packages' => []];
         foreach ($packages as $package) {
-            $document['packages'][] = self::package($package, $urls, $config, $language, $dsm7);
+            $json = self::package($package, $urls, $config, $language, $dsm7);
+            $json['download_count'] = $downloads[$package->name()]['total'] ?? 0;
+            $json['recent_download_count'] = $downloads[$package->name()]['recent'] ?? 0;
+            $document['packages'][] = $json;
         }
         if ($keyring !== null && trim($keyring) !== '') {
             $document['keyrings'] = [trim($keyring)];

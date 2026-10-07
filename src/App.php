@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace SSpkS;
 
+use SSpkS\Stats\DownloadStats;
+use SSpkS\Stats\GitHubStats;
+
 /**
  * Routes a request:
  *   DSM Package Center (unique=synology_*)  → catalog JSON
  *   ?icon=<file>&s=72|120                   → package icon
  *   ?screen=<file>&n=1                      → screenshot
+ *   ?stats                                  → download statistics page
  *   ?health                                 → "ok" (container health check)
  *   anything else                           → web page
  */
 final class App
 {
-    public const VERSION = '2.0.0';
+    public const VERSION = '2.1.0';
 
     private ?PackageRepository $repository = null;
 
@@ -60,6 +64,10 @@ final class App
             header('Allow: GET, HEAD');
             return;
         }
+        if (array_key_exists('stats', $query)) {
+            $this->statsPage();
+            return;
+        }
         if ($this->config->redirectIndex !== '') {
             header('Location: ' . $this->config->redirectIndex, true, 302);
             return;
@@ -103,7 +111,8 @@ final class App
 
         header('Content-Type: application/json; charset=utf-8');
         header('Cache-Control: no-store');
-        echo CatalogJson::render($packages, $this->urls(), $this->config, $param($params, 'language'), $dsm7, $keyring);
+        $downloads = $this->config->statsEnabled ? DownloadStats::perPackage($this->downloadSummary()) : [];
+        echo CatalogJson::render($packages, $this->urls(), $this->config, $param($params, 'language'), $dsm7, $keyring, $downloads);
     }
 
     private function image(string $file, string $kind, int $number): void
@@ -139,7 +148,53 @@ final class App
     private function page(): void
     {
         $lang = WebPage::language($this->config, (string) ($this->server['HTTP_ACCEPT_LANGUAGE'] ?? ''));
-        $html = (new WebPage($this->config, $this->repository(), $this->urls()))->render($lang);
+        $downloads = $this->config->statsEnabled ? DownloadStats::perPackage($this->downloadSummary()) : null;
+        $html = (new WebPage($this->config, $this->repository(), $this->urls()))->render($lang, $downloads);
+        $this->sendHtml($html);
+    }
+
+    private function statsPage(): void
+    {
+        if (!$this->config->statsEnabled) {
+            http_response_code(404);
+            header('Content-Type: text/plain; charset=utf-8');
+            echo "Statistics are turned off (SSPKS_STATS).\n";
+            return;
+        }
+        $lang = WebPage::language($this->config, (string) ($this->server['HTTP_ACCEPT_LANGUAGE'] ?? ''));
+        $github = (new GitHubStats(
+            $this->config->githubRepos,
+            $this->config->githubToken,
+            $this->config->cacheDir . '/stats/github.json',
+        ))->get();
+        $this->sendHtml(StatsPage::render(
+            $this->config,
+            $this->urls(),
+            $this->repository(),
+            $lang,
+            $this->downloadSummary(),
+            $github,
+        ));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function downloadSummary(): array
+    {
+        $names = [];
+        foreach ($this->repository()->all() as $package) {
+            $names[$package->file] = $package->name();
+        }
+        $state = (new DownloadStats(
+            $this->config->cacheDir . '/stats/downloads.log',
+            $this->config->cacheDir . '/stats/downloads.json',
+        ))->update(static fn (string $file): ?string => $names[$file] ?? null);
+        return DownloadStats::summarize($state, time());
+    }
+
+    private function sendHtml(string $html): void
+    {
         header('Content-Type: text/html; charset=utf-8');
         header('Cache-Control: no-cache');
         header('X-Content-Type-Options: nosniff');

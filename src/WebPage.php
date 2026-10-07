@@ -49,6 +49,34 @@ final class WebPage
             'packagesFew' => '%d пакета',
             'packagesMany' => '%d пакетов',
             'noscript' => 'Для списка пакетов нужен JavaScript. Центр пакетов на NAS работает и без него.',
+            'statsLink' => 'Статистика',
+            'packagesLink' => 'Пакеты',
+            'downloadsOne' => '%d скачивание',
+            'downloadsFew' => '%d скачивания',
+            'downloadsMany' => '%d скачиваний',
+            'statsTitle' => 'Статистика скачиваний',
+            'statsServer' => 'С этого сервера',
+            'statsRecent' => 'За %d дней',
+            'statsGithub' => 'На GitHub',
+            'statsDaily' => 'Скачивания с сервера по дням',
+            'statsByPackage' => 'По пакетам',
+            'statsPackage' => 'Пакет',
+            'statsTotal' => 'Всего',
+            'statsFromPage' => 'Со страницы',
+            'statsDirect' => 'Центр пакетов и прямые ссылки',
+            'statsLast' => 'Последнее',
+            'statsSince' => 'Подсчёт с %s',
+            'statsNone' => 'Скачиваний пока не было. Каждое скачивание .spk с этого сервера появится здесь.',
+            'statsGithubNone' => 'Чтобы видеть скачивания релизов, перечислите репозитории в SSPKS_GITHUB_REPOS.',
+            'statsGithubError' => 'GitHub недоступен (%s). Показаны данные от %s.',
+            'statsGithubChecked' => 'Обновлено %s, раз в час',
+            'statsGithubEmpty' => 'В этом репозитории нет релизов.',
+            'statsRelease' => 'Релиз',
+            'statsPublished' => 'Опубликован',
+            'statsFiles' => 'Файлы',
+            'statsPrerelease' => 'пре-релиз',
+            'statsShowAll' => 'Показать все релизы: %d',
+            'statsDisabled' => 'Статистика отключена.',
         ],
         'en' => [
             'sourceLabel' => 'Package Center source address',
@@ -88,6 +116,34 @@ final class WebPage
             'packagesFew' => '%d packages',
             'packagesMany' => '%d packages',
             'noscript' => 'The package list needs JavaScript. Package Center on your NAS works without it.',
+            'statsLink' => 'Statistics',
+            'packagesLink' => 'Packages',
+            'downloadsOne' => '%d download',
+            'downloadsFew' => '%d downloads',
+            'downloadsMany' => '%d downloads',
+            'statsTitle' => 'Download statistics',
+            'statsServer' => 'From this server',
+            'statsRecent' => 'Last %d days',
+            'statsGithub' => 'On GitHub',
+            'statsDaily' => 'Downloads from this server per day',
+            'statsByPackage' => 'By package',
+            'statsPackage' => 'Package',
+            'statsTotal' => 'Total',
+            'statsFromPage' => 'From the page',
+            'statsDirect' => 'Package Center and direct links',
+            'statsLast' => 'Last',
+            'statsSince' => 'Counting since %s',
+            'statsNone' => 'No downloads yet. Every .spk downloaded from this server will show up here.',
+            'statsGithubNone' => 'List repositories in SSPKS_GITHUB_REPOS to see their release downloads.',
+            'statsGithubError' => 'GitHub could not be reached (%s). Showing data from %s.',
+            'statsGithubChecked' => 'Updated %s, once an hour',
+            'statsGithubEmpty' => 'This repository has no releases.',
+            'statsRelease' => 'Release',
+            'statsPublished' => 'Published',
+            'statsFiles' => 'Files',
+            'statsPrerelease' => 'pre-release',
+            'statsShowAll' => 'Show all %d releases',
+            'statsDisabled' => 'Statistics are turned off.',
         ],
     ];
 
@@ -96,6 +152,14 @@ final class WebPage
         private readonly PackageRepository $repository,
         private readonly Urls $urls,
     ) {
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function strings(string $lang): array
+    {
+        return self::STRINGS[$lang] ?? self::STRINGS['en'];
     }
 
     public static function language(Config $config, string $acceptLanguage): string
@@ -112,9 +176,12 @@ final class WebPage
         return 'en';
     }
 
-    public function render(string $lang): string
+    /**
+     * @param array<string, array{total: int, recent: int}>|null $downloads Per package name; null when statistics are off.
+     */
+    public function render(string $lang, ?array $downloads = null): string
     {
-        $t = self::STRINGS[$lang] ?? self::STRINGS['en'];
+        $t = self::strings($lang);
         $synoLang = $lang === 'ru' ? 'rus' : 'enu';
 
         $groups = [];
@@ -139,6 +206,7 @@ final class WebPage
                 'supportUrl' => ($info['support_url'] ?? '') ?: ($this->config->packageDefaults['support_url'] ?? ''),
                 'changelog' => $info['changelog'] ?? '',
                 'screenshots' => $this->urls->screenshots($latest),
+                'downloads' => $downloads[(string) $name]['total'] ?? 0,
                 'builds' => array_map(fn (Package $p): array => [
                     'file' => $p->file,
                     'url' => $this->urls->download($p),
@@ -163,25 +231,48 @@ final class WebPage
             'aliases' => Architectures::ALIASES,
         ];
 
-        $view = [
-            'lang' => $lang,
-            't' => $t,
-            'siteName' => $this->config->siteName,
+        $view = self::frame($this->config, $this->urls, $lang, $items) + [
+            'subtitle' => self::plural($lang, count($items), $t),
+            'navLink' => $downloads !== null ? ['href' => $this->urls->base() . '?stats', 'label' => $t['statsLink']] : null,
             'sourceUrl' => $this->urls->base(),
-            'assetBase' => $this->urls->base() . 'assets/',
-            'assetVersion' => substr(sha1(App::VERSION . $this->config->commit), 0, 8),
-            'count' => count($items),
-            'betaFlags' => array_map(static fn (array $item): bool => $item['beta'], $items),
-            'version' => App::VERSION,
-            'commit' => substr($this->config->commit, 0, 7),
-            'json' => json_encode(
-                $data,
-                JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-                    | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR
-            ),
+            'json' => self::json($data),
         ];
 
-        return self::template(dirname(__DIR__) . '/templates/page.php', $view);
+        return self::template('page.php', $view);
+    }
+
+    /**
+     * Values every page needs: language, strings, header with drive bays, footer.
+     *
+     * @param list<array{beta: bool}> $items Package groups, for the drive bays.
+     * @return array<string, mixed>
+     */
+    public static function frame(Config $config, Urls $urls, string $lang, array $items): array
+    {
+        return [
+            'lang' => $lang,
+            't' => self::strings($lang),
+            'siteName' => $config->siteName,
+            'assetBase' => $urls->base() . 'assets/',
+            'assetVersion' => substr(sha1(App::VERSION . $config->commit), 0, 8),
+            'betaFlags' => array_map(static fn (array $item): bool => $item['beta'], $items),
+            'version' => App::VERSION,
+            'commit' => substr($config->commit, 0, 7),
+        ];
+    }
+
+    /**
+     * JSON that is safe inside <script type="application/json">.
+     *
+     * @param array<mixed> $data
+     */
+    public static function json(array $data): string
+    {
+        return json_encode(
+            $data,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+                | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR
+        );
     }
 
     public static function plural(string $lang, int $n, array $t): string
@@ -200,12 +291,14 @@ final class WebPage
     /**
      * @param array<string, mixed> $view
      */
-    private static function template(string $file, array $view): string
+    public static function template(string $name, array $view): string
     {
+        $file = dirname(__DIR__) . '/templates/' . $name;
         $e = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         ob_start();
         try {
             (static function (string $__file, array $view, callable $e): void {
+                $__templates = dirname($__file);
                 require $__file;
             })($file, $view, $e);
             return (string) ob_get_clean();

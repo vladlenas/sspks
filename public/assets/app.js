@@ -44,11 +44,13 @@
         return template.replace('%d', String(value)).replace('%s', String(value));
     }
 
-    function pluralPackages(n) {
+    function plural(prefix, n) {
         const rule = new Intl.PluralRules(lang).select(n);
-        const key = rule === 'one' ? 'packagesOne' : rule === 'few' ? 'packagesFew' : 'packagesMany';
-        return format(t[key], n);
+        const key = prefix + (rule === 'one' ? 'One' : rule === 'few' ? 'Few' : 'Many');
+        return format(t[key], new Intl.NumberFormat(lang).format(n));
     }
+
+    const pluralPackages = (n) => plural('packages', n);
 
     const sizeUnits = ['kilobyte', 'megabyte', 'gigabyte'];
     function formatSize(bytes) {
@@ -299,12 +301,13 @@
         const archText = archs.length > 4 ? `${archs.slice(0, 3).join(', ')} +${archs.length - 3}` : archs.join(', ');
         const dsmText = dsmLabel(primary.minDsm);
 
-        entry.meta.replaceChildren(
+        entry.meta.replaceChildren(...[
             el('li', { title: archs.join(', '), text: archText }),
             dsmText ? el('li', { text: dsmText }) : null,
             el('li', { text: formatSize(primary.size) }),
             el('li', { title: absolute.format(new Date(primary.updated * 1000)), text: `${t.updated} ${formatAge(primary.updated)}` }),
-        );
+            entry.item.downloads > 0 ? el('li', { text: plural('downloads', entry.item.downloads) }) : null,
+        ].filter(Boolean));
 
         entry.actions.replaceChildren();
         if (matching.length === 1) {

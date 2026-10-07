@@ -16,6 +16,7 @@ final class Config
 {
     /**
      * @param array<string, string> $packageDefaults Fallback maintainer/distributor/support values.
+     * @param list<string> $githubRepos "owner/repo" entries whose release downloads are shown.
      */
     public function __construct(
         public readonly string $siteName = 'Synology packages',
@@ -28,6 +29,9 @@ final class Config
         public readonly array $packageDefaults = [],
         public readonly string $commit = '',
         public readonly string $branch = '',
+        public readonly bool $statsEnabled = true,
+        public readonly array $githubRepos = [],
+        public readonly string $githubToken = '',
     ) {
     }
 
@@ -67,6 +71,25 @@ final class Config
             ],
             commit: $get('SSPKS_COMMIT'),
             branch: $get('SSPKS_BRANCH'),
+            statsEnabled: !in_array(strtolower($get('SSPKS_STATS', 'on')), ['off', 'no', 'false', '0'], true),
+            githubRepos: self::parseRepos($get('SSPKS_GITHUB_REPOS')),
+            githubToken: $get('SSPKS_GITHUB_TOKEN'),
         );
+    }
+
+    /**
+     * "owner/repo owner2/repo2" (spaces or commas) → validated list.
+     *
+     * @return list<string>
+     */
+    public static function parseRepos(string $value): array
+    {
+        $repos = [];
+        foreach (preg_split('/[\s,]+/', trim($value)) ?: [] as $repo) {
+            if (preg_match('#^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$#', $repo) === 1) {
+                $repos[] = $repo;
+            }
+        }
+        return array_values(array_unique($repos));
     }
 }

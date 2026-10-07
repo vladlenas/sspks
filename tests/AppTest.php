@@ -96,4 +96,65 @@ final class AppTest extends TestCase
 
         $this->assertSame('', $this->request([], [], ['REQUEST_METHOD' => 'DELETE'] + self::SERVER));
     }
+
+    private function logDownload(string $file, string $referer = '-'): void
+    {
+        @mkdir($this->cacheDir . '/stats');
+        file_put_contents(
+            $this->cacheDir . '/stats/downloads.log',
+            implode("\t", [time() - 60, '200', 'GET', '/packages/' . $file, '-', $referer]) . "\n",
+            FILE_APPEND
+        );
+    }
+
+    public function testDownloadCountsInCatalogAndPage(): void
+    {
+        $this->logDownload('alpha_x64-1.1.spk');
+        $this->logDownload('alpha_armv8-1.1.spk', 'https://nas.local/');
+
+        $doc = json_decode($this->request([], [
+            'unique' => 'synology_geminilake_920+', 'arch' => 'geminilake',
+            'major' => '7', 'minor' => '2', 'build' => '64570',
+        ]), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(2, $doc['packages'][0]['download_count']);
+        $this->assertSame(2, $doc['packages'][0]['recent_download_count']);
+        $this->assertSame(0, $doc['packages'][1]['download_count']);
+
+        $html = $this->request([]);
+        $this->assertStringContainsString('href="http://nas.local/?stats"', $html);
+        preg_match('#<script type="application/json" id="data">(.*?)</script>#s', $html, $m);
+        $data = json_decode($m[1], true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(2, $data['items'][0]['downloads']);
+    }
+
+    public function testStatsPage(): void
+    {
+        $this->logDownload('alpha_x64-1.0.spk');
+        $html = $this->request(['stats' => '']);
+
+        $this->assertStringContainsString('stats.js', $html);
+        $this->assertStringContainsString('href="http://nas.local/"', $html);
+        preg_match('#<script type="application/json" id="data">(.*?)</script>#s', $html, $m);
+        $data = json_decode($m[1], true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame(1, $data['server']['total']);
+        $this->assertSame('alpha', $data['server']['packages'][0]['name']);
+        $this->assertSame('alpha', $data['server']['packages'][0]['displayName'], 'newest build has no displayname');
+        $this->assertSame([], $data['github']);
+        $this->assertFalse($data['githubConfigured']);
+    }
+
+    public function testStatsCanBeTurnedOff(): void
+    {
+        $config = new Config(packagesDir: $this->packagesDir, cacheDir: $this->cacheDir, statsEnabled: false);
+        $app = new App($config, self::SERVER, dirname(__DIR__) . '/public');
+
+        ob_start();
+        $app->handle(['stats' => ''], ['stats' => '']);
+        $this->assertStringContainsString('turned off', (string) ob_get_clean());
+
+        ob_start();
+        $app->handle([], []);
+        $html = (string) ob_get_clean();
+        $this->assertStringNotContainsString('?stats', $html);
+    }
 }

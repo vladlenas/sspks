@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] - 2026-10
+
+### Added
+- Download statistics at `/?stats`: downloads from this server per day and per
+  package (from the web page vs. Package Center/direct links), and download
+  counters of GitHub releases for repositories in `SSPKS_GITHUB_REPOS`
+  (cached for an hour, last good data kept when GitHub is unreachable).
+- Download totals in the package list and in the catalog's
+  `download_count`/`recent_download_count`.
+- `TZ` sets the time zone for dates; `SSPKS_STATS=off` turns statistics off.
+
+### Fixed
+- Empty list items were rendered as the text "null" in package details when
+  a package had no minimum DSM version.
+
 ## [2.0.0] - 2026-10
 
 Rewrite of the fork. Same idea, same `/packages` and `/cache` volumes, same

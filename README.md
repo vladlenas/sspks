@@ -6,7 +6,7 @@ folder, run the container, and add its address in
 page that lists the packages with search, platform and DSM filters, and
 download links.
 
-Forked from [jdel/sspks](https://github.com/jdel/sspks) and rewritten in 2.0
+Originally based on jdel/sspks by Julien Del-Piccolo; rewritten in 2.0.
 (see [CHANGELOG](CHANGELOG.md)). No runtime dependencies besides PHP 8.2+.
 
 ## Run on a Synology NAS

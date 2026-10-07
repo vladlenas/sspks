@@ -1,123 +1,48 @@
 # Changelog
-All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes to this project are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
+[Semantic Versioning](https://semver.org/).
 
-<!-- CHANGELOGGER -->
+## [2.0.0] - 2026-10
+
+Rewrite of the fork. Same idea, same `/packages` and `/cache` volumes, same
+port 8080 and the same `SSPKS_*` variables.
+
+### Changed
+- New web interface: one page with search, platform and DSM filters, all
+  builds of a package, changelog and screenshots, Russian and English,
+  light and dark theme.
+- SPK files are read with a built-in streaming tar reader instead of
+  PharData; nothing is extracted to a shared temp folder any more.
+- Cache: one record per package, rebuilt when the file's size or
+  modification time changes. Replacing a package under the same name is
+  picked up immediately, MD5 is computed once per file instead of on every
+  request, entries of deleted packages and files from 1.x are cleaned up.
+- Docker image based on `php:8.4-apache`, runs as an unprivileged user,
+  only the `public/` folder and `*.spk` downloads are reachable, health check.
+- `deppkgs` comes from `install_dep_packages` and `conflictpkgs` from
+  `install_conflict_packages` (previously `install_dep_services` was sent).
+- ARM platforms are mapped to their families (`armv7`, `armv8`), and
+  `x64`/`aarch64` are accepted as aliases.
+- Settings come only from environment variables (or `config.local.php`).
+  `conf/sspks.yaml` and `conf/synology_models.yaml` are gone.
+- `gpgkey.asc` is read from the packages folder.
+- CI: tests on PHP 8.2–8.4, multi-arch image on GHCR.
+
+### Fixed
+- Catalog JSON broke on quotes and backslashes in descriptions or changelogs
+  (`stripslashes` on the encoded JSON).
+- Race between concurrent requests extracting different packages.
+- Package file names with spaces or `+` produced broken download links.
+- An empty update channel returned no packages.
+- PHP 8.1+ deprecation notices.
+
+### Removed
+- Native SPK package of the server (`_syno_package`): it did not install
+  on DSM 7. Use the Docker image.
+- `?fulllist`, the device model list, `selftest.php` (use `?health`),
+  Composer, Gitpod and Scrutinizer setup.
 
 ## [1.2.1] - 2022-03-16
-
-### Feature removal (1 change)
-
-- Remove Krypt.co client (props Björn Strausmann)
-
-### Feature change (2 changes)
-
-- Cleanup docker build image in .dockerignore (props Björn Strausmann)
-- Changed ENV vendor/bin for composer (props Björn Strausmann)
-
-### New feature (4 changes)
-
-- Added changelogs/unreleased folder structure (props Björn Strausmann)
-- Added git commit with gpg signature support (props Björn Strausmann)
-- Added automatic activate the intelephense license (props Björn Strausmann)
-- Added optimize the detection of https requrest (props Björn Strausmann)
-
-
-## [1.2.0] - 2022-02-19
-
-### Feature change (2 changes)
-
-- Filtering differently on DSM <7 and >=7 by @picrap in #84
-- Better DSM 7 support by @MartinRothschink in #88
-- Fix/update alpine php by @jdel in #90
-- Migrate to Github Actions by @jdel in #91
-
-## [1.1.6] - 2021-07-19	
-### Added
-
-* Support for DSM 7
-* Support for locales
-* Add GitPod Support [@strausmann](https://github.com/strausmann)
-* Update with all new models [@strausmann](https://github.com/strausmann)
-
-### Changed
-
-* Description for Docker ENV added to the `README.md`
-* Update with all new models
-* Added new x86_64 avoton models (#60) [@eburud](https://github.com/eburud)
-
-## [1.1.3] - 2018-07-25
-### Added
-
-* Add missing support_url and auto_upgrade_from fields [@MartinRothschink](https://github.com/MartinRothschink) (PR #55)
-* Add more envirinment variables to override configuration (for use with docker)
-
-### Changed
-
-* Upgrade Docker to jdel/alpine:3.8, php7, composer 1.6.5, remove supervisor, change volumes to `/packages` and `/cache`
-* Update `README` with docker instructions
-* Update synology models (#50) [@4sag](https://github.com/4sag)
-
-
-## [1.1.2] - 2018-01-19
-### Added
-
-* Implement qflags logic + some scrutinizer bits
-
-## [1.1.1] - 2017-08-15
-### Added
-
-* Add version info from env variables (#41)
-
-Override from ENV variables:
-
-  - site.name (SSPKS_SITE_NAME)
-  - site.theme (SSPKS_SITE_THEME)
-  - site.redirectindex (SSPKS_SITE_REDIRECTINDEX)
-  
-And please Scrutinizer.
-### Changed
-
-* Minor update mostly useful for Docker.
-
-
-## [1.1.0] - 2017-05-15
-### Added
-
-* A License
-* Automated builds, tests and ci
-* Facelift with Material Design
-
-### Changed
-
-* Updated models
-* Extracted files are put in a cache/ dir
-* Locales support for packages display name and description (#47)
-* Locales in pkg name & description JSON result
-* Fixed tests
-* Scrutinizer didn't like string interpolation
-* JsonOutput $langue default to 'enu'
-* Docker image
-
-## [1.0.0] - 2017-04-04
-### Added
-
-* Make Scrutinizer happy.
-
-## [0.2.0] - 2017-01-16
-### Changed
-
-* Fix Dockerfile
-
-## [0.1.0] - 2017-01-16
-### Changed
-
-* Fix Dockerfile
-
-## [0.0.1] - 2013-04-12
-### Added
-
-* Initial version. Base functionality is there. 
-* Requires more work on HTML5/CSS3 design.
+Last release of the original code base.

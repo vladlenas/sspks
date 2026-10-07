@@ -1,48 +1,26 @@
-BRANCH?=`git rev-parse --abbrev-ref HEAD`
-COMMIT?=`git rev-parse HEAD`
-DATE=`date "+%Y%m%d"`
+IMAGE ?= sspks:dev
+PHPUNIT_URL = https://phar.phpunit.de/phpunit-11.phar
 
-.PHONY: all
-all: build spk clean
-	
-.PHONY: spk
-spk: sspks_noarch_${DATE}.spk
+.PHONY: build run test fixtures
 
-.PHONY: build
 build:
-	@docker build --build-arg BRANCH=${BRANCH} --build-arg COMMIT=${COMMIT} --tag=vladlenas/sspks .
+	docker build \
+		--build-arg BRANCH="$$(git rev-parse --abbrev-ref HEAD)" \
+		--build-arg COMMIT="$$(git rev-parse HEAD)" \
+		-t $(IMAGE) .
 
-sspks_noarch_${DATE}.spk: package.tgz INFO
-	@cd ./_syno_package && COPYFILE_DISABLE=1 tar cfv ../sspks_noarch_${DATE}.spk --exclude='./package' *
+# Serves the test fixtures on http://localhost:9999/
+run: build
+	mkdir -p .cache
+	docker run --rm -p 9999:8080 --user "$$(id -u):$$(id -g)" \
+		-v "$(CURDIR)/tests/fixtures/spk:/packages:ro" \
+		-v "$(CURDIR)/.cache:/cache" \
+		-e SSPKS_SITE_NAME="SSpkS dev" \
+		$(IMAGE)
 
-package.tgz: .htaccess
-	@rm -rf ./_syno_package/package/share/sspks/*
-	@rsync -av --delete ./* ./_syno_package/package/share/sspks \
-	       --exclude _syno_package \
-	       --exclude docker \
-	       --exclude hooks \
-				 --exclude Dockerfile \
-				 --exclude INSTALL.md \
-				 --exclude README.md \
-				 --exclude Makefile \
-				 --exclude VERSION \
-				 --exclude CHANGELOG \
-				 --exclude phpunit.xml.dist \
-				 --exclude tests
-	@cd ./_syno_package/package && COPYFILE_DISABLE=1 tar cfvz ../package.tgz *
+test:
+	docker run --rm -v "$(CURDIR):/app" -w /app php:8.4-cli \
+		sh -c "curl -fsSLo /tmp/phpunit $(PHPUNIT_URL) && php /tmp/phpunit"
 
-.htaccess:
-	@mkdir -p ./_syno_package/package/share/sspks
-	@echo "DirectoryIndex index.php" > ./_syno_package/package/share/sspks/.htaccess
-
-INFO: VERSION
-	@sed -i "s/version=\"\"/version=\"$(shell cat VERSION)\"/" ./_syno_package/INFO
-
-.PHONY: clean
-clean:
-	@sed -i "s/version=\"$(shell cat VERSION)\"/version=\"\"/" ./_syno_package/INFO
-	@rm -rf ./_syno_package/package/share/sspks/ ./_syno_package/package.tgz ./sspks_noarch_${DATE}.spk
-
-.PHONY: release
-release: build
-	@docker build --tag=vladlenas/sspks:$(shell cat VERSION) .
+fixtures:
+	python3 tests/fixtures/make-fixtures.py

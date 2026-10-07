@@ -1,102 +1,61 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SSpkS\Tests;
 
-use PHPUnit\Framework\TestCase;
-use SSpkS\Config;
-use SSpkS\Package\PackageFinder;
-use SSpkS\Package\PackageFilter;
+use SSpkS\Architectures;
+use SSpkS\Package;
+use SSpkS\PackageFilter;
+use SSpkS\PackageRepository;
 
-class PackageFilterTest extends TestCase
+final class PackageFilterTest extends TestCase
 {
-    private $config;
-    private $testFolder = __DIR__ . '/example_packageset/';
-    private $testList;
-
-    public function setUp(): void
+    /** @return list<string> */
+    private function filesFor(string $arch, string $firmware, string $channel = 'stable'): array
     {
-        $this->config = new Config(__DIR__, 'example_configs/sspks.yaml');
-        $this->config->paths = array_merge(
-            $this->config->paths,
-            array('packages' => $this->testFolder)
-        );
-        $pf = new PackageFinder($this->config);
-        $this->testList = $pf->getAllPackages();
+        $all = (new PackageRepository($this->config()))->all();
+        $files = array_map(static fn (Package $p): string => $p->file, PackageFilter::forDevice($all, $arch, $firmware, $channel));
+        sort($files);
+        return $files;
     }
 
-    public function testPassThru()
+    public function testDsm7IntelStable(): void
     {
-        $pf = new PackageFilter($this->config, $this->testList);
-        $pl = $pf->getFilteredPackageList();
-        $this->assertContainsOnlyInstancesOf(\SSpkS\Package\Package::class, $pl);
-        $this->assertEquals($pl, $this->testList);
+        $this->assertSame(['alpha_x64-1.1.spk', 'longname.spk'], $this->filesFor('avoton', '7.2.64570'));
     }
 
-    public function testOmitOldVersions()
+    public function testBetaChannelAddsBetaPackages(): void
     {
-        $pf = new PackageFilter($this->config, $this->testList);
-        $pf->setOldVersionFilter(true);
-        $newList = $pf->getFilteredPackageList();
-        // 2 files are dupes
-        $this->assertCount(count($this->testList)-2, $newList);
+        $this->assertSame(['alpha_x64-1.1.spk', 'beta-tool.spk', 'longname.spk'], $this->filesFor('geminilake', '7.2.64570', 'beta'));
     }
 
-    public function testArchitectureFilter()
+    public function testArmGetsArmBuildThroughAlias(): void
     {
-        $pf = new PackageFilter($this->config, $this->testList);
-        $pf->setArchitectureFilter('x86_64');
-        $newList = $pf->getFilteredPackageList();
-        foreach ($newList as $pkg) {
-            if(is_array($pkg->arch[0]) || is_object($pkg->arch[0])) {
-                $this->assertContains('x86_64 noarch', $pkg->arch[0]);
-            }
-        }
-
-        $pf->setArchitectureFilter('avoton');
-        $newList = $pf->getFilteredPackageList();
-        // expect avoton + noarch packages: 3
-        $this->assertCount(3, $newList);
+        $this->assertSame(['alpha_armv8-1.1.spk', 'longname.spk'], $this->filesFor('rtd1296', '7.1.42661'));
     }
 
-    public function testFirmwareVersionFilter()
+    public function testDsm6OnlySeesDsm6Packages(): void
     {
-        $pf = new PackageFilter($this->config, $this->testList);
-        $pf->setFirmwareVersionFilter('1.0-0000');
-        $newList = $pf->getFilteredPackageList();
-        $this->assertCount(3, $newList);
-        $pf->setFirmwareVersionFilter('0.9-9999');
-        $newList = $pf->getFilteredPackageList();
-        $this->assertCount(0, $newList);
-        $pf->setFirmwareVersionFilter('1.0-1233');
-        $newList = $pf->getFilteredPackageList();
-        $this->assertCount(4, $newList);
-        $pf->setFirmwareVersionFilter('1.0-1234');
-        $newList = $pf->getFilteredPackageList();
-        $this->assertCount(5, $newList);
-        $pf->setFirmwareVersionFilter('7.0-40000');
-        $newList = $pf->getFilteredPackageList();
-        $this->assertCount(0, $newList);
+        $this->assertSame(['legacy_dsm6.spk'], $this->filesFor('avoton', '6.2.25556'));
     }
 
-    public function testChannelFilter()
+    public function testMinimumDsmVersionIsRespected(): void
     {
-        $pf = new PackageFilter($this->config, $this->testList);
-        $pf->setChannelFilter('stable');
-        $newList = $pf->getFilteredPackageList();
-        $this->assertCount(4, $newList);
-        $pf->setChannelFilter('beta');
-        $newList = $pf->getFilteredPackageList();
-        $this->assertCount(5, $newList);
-        $pf->setChannelFilter('invalid');
-        $newList = $pf->getFilteredPackageList();
-        $this->assertCount(0, $newList);
+        $this->assertSame([], $this->filesFor('avoton', '7.0.30000'));
+        $this->assertSame([], $this->filesFor('avoton', '6.0.7321'));
     }
 
-    public function tearDown(): void
+    public function testUnknownPlatformStillGetsNoarch(): void
     {
-        $del = array_merge(glob($this->testFolder . '*.nfo'), glob($this->testFolder . '*.png'));
-        foreach ($del as $file) {
-            unlink($file);
-        }
+        $this->assertSame(['longname.spk'], $this->filesFor('someNewChip', '7.2.64570'));
+    }
+
+    public function testArchitectures(): void
+    {
+        $this->assertSame(['geminilake', 'x86_64', 'x64', 'noarch'], Architectures::compatibleWith('GeminiLake'));
+        $this->assertSame(['armada38x', 'armv7', 'noarch'], Architectures::compatibleWith('armada38x'));
+        $this->assertSame('armv8', Architectures::familyOf('rtd1619b'));
+        $this->assertArrayHasKey('x86_64', Architectures::grouped());
     }
 }

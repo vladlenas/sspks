@@ -1,0 +1,23 @@
+# Synology Container Manager → Project → Create → paste this file.
+# Adjust the paths, the port and the user (see README: "Permissions").
+services:
+  sspks:
+    image: ghcr.io/vladlenas/sspks:latest
+    container_name: sspks
+    restart: unless-stopped
+    # UID:GID of the DSM user that owns the folders below (run `id` over SSH).
+    user: "1026:100"
+    ports:
+      - "9999:8080"
+    volumes:
+      - /volume1/docker/sspks/packages:/packages:ro
+      - /volume1/docker/sspks/cache:/cache
+    environment:
+      SSPKS_SITE_NAME: "Synology packages"
+      # SSPKS_SITE_LANG: ru                     # ru or en; default follows the browser
+      # SSPKS_BASE_URL: https://spk.example.com/ # only if auto-detection behind a proxy is wrong
+      # SSPKS_PACKAGES_MAINTAINER: ""
+      # SSPKS_PACKAGES_MAINTAINER_URL: ""
+      # SSPKS_PACKAGES_DISTRIBUTOR: ""
+      # SSPKS_PACKAGES_DISTRIBUTOR_URL: ""
+      # SSPKS_PACKAGES_SUPPORT_URL: ""

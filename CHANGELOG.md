@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- GitHub statistics counted every release file. Only `.spk` files count now:
+  `SHA256SUMS`, which `update-packages.sh` downloads on every update, and
+  other helper files no longer inflate the numbers.
+
 ## [2.1.0] - 2026-10
 
 ### Added

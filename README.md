@@ -99,10 +99,21 @@ hour.
 
 ## Keeping packages up to date
 
-[`scripts/update-torrserver.sh`](scripts/update-torrserver.sh) is an example
-for DSM Task Scheduler: it fetches the SPKs of the latest GitHub release,
-verifies them and swaps them in atomically. Replacing files is all it takes;
-the server notices changed files by size and modification time.
+[`scripts/update-packages.sh`](scripts/update-packages.sh) is meant for DSM
+Task Scheduler. For every repository in its `PACKAGES` list it fetches the
+SPKs of the latest GitHub release, verifies them (tar archive, INFO version,
+`SHA256SUMS` if the release has one) and swaps them in atomically; it never
+installs an older version. Replacing files is all it takes: the server
+notices changed files by size and modification time.
+
+Each entry has a channel. `stable` takes GitHub's latest normal release;
+`beta` also takes pre-releases, and its SPKs must carry `beta="yes"` in INFO,
+so that only NAS with beta versions enabled in Package Center are offered
+them (files without the flag are refused). Needs `python3` (part of DSM 7).
+
+[`scripts/update-torrserver.sh`](scripts/update-torrserver.sh) is the older
+single-package version, kept as a simpler example. Schedule only one of the
+two: both manage the TorrServer files.
 
 ## Development
 

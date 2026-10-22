@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1
-FROM php:8.4-apache
+# Pinned to a patch release so a security fix is a visible one-line change
+# (Dependabot proposes new ones). 8.4.27 fixes CVE-2026-109618/-109619.
+FROM php:8.4.27-apache
 
 ARG BRANCH=""
 ARG COMMIT=""
@@ -16,6 +18,8 @@ LABEL org.opencontainers.image.title="SSpkS" \
       org.opencontainers.image.revision="${COMMIT}"
 
 RUN set -eux; \
+    php -r 'exit(version_compare(PHP_VERSION, "8.4.27", "<") ? 1 : 0);' \
+        || { echo "PHP $(php -r 'echo PHP_VERSION;') lacks the fixes for CVE-2026-109618/-109619" >&2; exit 1; }; \
     mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"; \
     docker-php-ext-enable opcache; \
     a2enmod headers; \

@@ -4,12 +4,17 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [2.1.1] - 2026-10-22
 
-### Fixed
-- GitHub statistics counted every release file. Only `.spk` files count now:
-  `SHA256SUMS`, which `update-packages.sh` downloads on every update, and
-  other helper files no longer inflate the numbers.
+### Security
+- Base image pinned to `php:8.4.27-apache`, which fixes CVE-2026-109618 and
+  CVE-2026-109619 ("PHP2Shell", unauthenticated remote code execution; the
+  image uses Apache mod_php, the most exposed setup). The build fails if
+  the base image has an older PHP.
+- `session.upload_progress.enabled = 0` as additional hardening (SSpkS uses
+  no sessions).
+- The image is rebuilt every week, so security updates of the base image
+  arrive without a code change.
 
 ## [2.1.0] - 2026-10
 

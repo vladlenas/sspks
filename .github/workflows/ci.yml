@@ -5,6 +5,10 @@ on:
     branches: [master]
     tags: ['v*.*.*']
   pull_request:
+  # Weekly rebuild: picks up security updates of the Debian/Apache layers
+  # in the base image even when nothing in this repository changed.
+  schedule:
+    - cron: '17 3 * * 1'
   workflow_dispatch:
 
 permissions:
@@ -70,6 +74,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          pull: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |

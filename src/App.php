@@ -18,7 +18,7 @@ use SSpkS\Stats\GitHubStats;
  */
 final class App
 {
-    public const VERSION = '2.1.0';
+    public const VERSION = '2.1.1';
 
     private ?PackageRepository $repository = null;
 

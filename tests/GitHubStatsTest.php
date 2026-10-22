@@ -47,7 +47,7 @@ final class GitHubStatsTest extends TestCase
             $page1[] = self::release("v1.{$i}", ['a.spk' => 1]);
         }
         $page2 = [
-            self::release('v0.9', ['x64.spk' => 5, 'arm.spk' => 7], ['prerelease' => true]),
+            self::release('v0.9', ['x64.spk' => 5, 'arm.spk' => 7, 'SHA256SUMS' => 40, 'plugin.zip' => 3], ['prerelease' => true]),
             self::release('v2.0-draft', ['x64.spk' => 99], ['draft' => true]),
         ];
         $this->responses = [

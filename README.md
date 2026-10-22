@@ -87,7 +87,8 @@ as screenshots. A `gpgkey.asc` in the packages folder is published as keyring
 `/?stats` shows how often packages were downloaded from this server (per day
 and per package, split into downloads from the web page and from Package
 Center or direct links) and, for repositories listed in
-`SSPKS_GITHUB_REPOS`, the download counters of their GitHub releases. The
+`SSPKS_GITHUB_REPOS`, the download counters of the `.spk` files in their
+GitHub releases (checksum files and the like are not counted). The
 package list shows a total per package, and Package Center receives the same
 numbers in `download_count`.
 

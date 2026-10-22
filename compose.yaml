@@ -15,7 +15,7 @@ services:
     environment:
       TZ: Europe/Vilnius                        # dates in the statistics
       SSPKS_SITE_NAME: "Synology packages"
-      SSPKS_GITHUB_REPOS: vladlenas/TorrServer-DSM   # release downloads on the statistics page
+      SSPKS_GITHUB_REPOS: vladlenas/TorrServer-DSM vladlenas/Silo-DSM   # release downloads on the statistics page
       # SSPKS_GITHUB_TOKEN: ""                  # only if the GitHub API limit is ever hit
       # SSPKS_STATS: "off"                      # hides statistics and download counts
       # SSPKS_SITE_LANG: ru                     # ru or en; default follows the browser

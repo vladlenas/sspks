@@ -9,7 +9,8 @@ use SSpkS\AtomicFile;
 /**
  * Download counters of GitHub release assets.
  *
- * GitHub keeps a download_count per release file. These are fetched at most
+ * GitHub keeps a download_count per release file; only .spk files are
+ * counted. These are fetched at most
  * once per $ttl seconds per repository and cached, so the page stays fast
  * and the unauthenticated API limit (60 requests/hour) is never an issue.
  * If GitHub can't be reached, the last good numbers are shown with the error.
@@ -150,7 +151,9 @@ final class GitHubStats
                 }
                 $assets = [];
                 foreach ((array) ($release['assets'] ?? []) as $asset) {
-                    if (is_array($asset) && isset($asset['name'])) {
+                    // Only packages count: SHA256SUMS, spk-index.json and the
+                    // like are fetched by scripts, not by people.
+                    if (is_array($asset) && isset($asset['name']) && str_ends_with(strtolower((string) $asset['name']), '.spk')) {
                         $assets[] = ['name' => (string) $asset['name'], 'count' => (int) ($asset['download_count'] ?? 0)];
                     }
                 }

@@ -1,5 +1,8 @@
 #!/bin/sh
 #
+# Superseded by update-packages.sh, which handles several packages and beta
+# channels. Kept as a simpler single-package example; do not schedule both.
+#
 # Puts the SPK files of the latest GitHub release of TorrServer-DSM into the
 # SSpkS packages folder. Meant for DSM Task Scheduler (run as root or as the
 # user that owns the packages folder).
